@@ -1,3 +1,4 @@
+from playsound import playsound
 import dlib
 import numpy as np
 import cv2
@@ -32,6 +33,10 @@ cursor.execute(create_table_sql)
 # Commit changes and close the connection
 conn.commit()
 conn.close()
+
+def play_notification_sound():
+    sound_path = "/Users/lengocphan/Documents/Face-Recognition-Based-Attendance-System/H42VWCD-notification.mp3"  # Đặt đường dẫn đến file âm thanh của bạn ở đây
+    playsound(sound_path)
 
 
 class Face_Recognizer:
@@ -79,7 +84,10 @@ class Face_Recognizer:
         #  Reclassify after 'reclassify_interval' frames
         self.reclassify_interval_cnt = 0
         self.reclassify_interval = 10
-
+        
+        
+    
+        
     #  "features_all.csv"  / Get known faces from "features_all.csv"
     def get_face_database(self):
         if os.path.exists("data/features_all.csv"):
@@ -156,6 +164,8 @@ class Face_Recognizer:
                                  1,
                                  cv2.LINE_AA)
     # insert data in database
+    
+    
 
     def attendance(self, name):
         current_date = datetime.datetime.now().strftime('%Y-%m-%d')
@@ -178,6 +188,8 @@ class Face_Recognizer:
     #  Face detection and recognition wit OT from input video stream
     def process(self, stream):
         # 1.  Get faces known from "features.all.csv"
+        is_exist = np.False_
+        is_Noti = np.False_
         if self.get_face_database():
             while stream.isOpened():
                 self.frame_cnt += 1
@@ -298,6 +310,7 @@ class Face_Recognizer:
                                 print(type(self.face_name_known_list[similar_person_num]))
                                 print(nam)
                                 self.attendance(nam)
+                                is_exist = np.True_
                             else:
                                 logging.debug("  Face recognition result: Unknown person")
 
@@ -311,8 +324,11 @@ class Face_Recognizer:
                 self.update_fps()
                 cv2.namedWindow("camera", 1)
                 cv2.imshow("camera", img_rd)
-
+                if is_exist == np.True_ & is_Noti == np.False_:
+                    play_notification_sound()
+                    is_Noti = np.True_
                 logging.debug("Frame ends\n\n")
+            
 
     
 
